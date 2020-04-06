@@ -1,0 +1,47 @@
+{
+  "$id": "http://ziti-edge.netfoundry.io/schemas/definitions.json",
+  "definitions": {
+    "tags": {
+      "type": "object",
+      "default": {},
+      "additionalProperties": false,
+      "patternProperties": {
+        "^.{1,50}$": {
+          "anyOf": [
+            {
+              "type": "null"
+            },
+            {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 2084
+            },
+            {
+              "type": "number",
+              "minLength": 1,
+              "maxLength": 2084
+            },
+            {
+              "type": "boolean"
+            }
+          ]
+        }
+      }
+    },
+    "name": {
+      "type": "string",
+      "minLength": 2,
+      "maxLength": 256
+    },
+    "id": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 256
+    },
+    "fingerprint": {
+      "type": "string",
+      "minLength": 31,
+      "maxLength": 255
+    }
+  }
+}

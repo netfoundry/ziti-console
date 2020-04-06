@@ -1,0 +1,19 @@
+{
+  "name": "@netfoundry/zt-logger",
+  "version": "0.0.1",
+  "description": "A wrapper around Bunyan for global logging within a process.",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": {
+    "name": "NetFoundry",
+    "url": "http://netfoundry.io"
+  },
+  "license": "Apache-2.0",
+  "dependencies": {
+    "bunyan": "^1.8.12",
+    "parent-module": "^0.1.0",
+    "read-pkg-up": "^3.0.0"
+  }
+}

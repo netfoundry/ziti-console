@@ -1,11 +1,11 @@
 {
-  "name": "io.netfoundry.zac",
-  "version": "0.4.0",
+  "name": "ziti-admin-console",
+  "version": "0.5.0",
   "description": "Ziti Administration Console",
   "main": "server.js",
   "scripts": {
     "clean": "rm -rf node_modules;",
-    "start": "node index.js",
+    "start": "node index.js -c conf/local-dev/zac-01.json --pretty",
     "test": "exec",
     "docker:build": "cross-conf-env docker image build . -t $npm_package_config_imageRepo:$npm_package_version",
     "docker-branch:build": "cross-conf-env docker image build . -t $npm_package_config_imageRepo:$npm_package_version-$BITBUCKET_BRANCH-$BITBUCKET_BUILD_NUMBER",
@@ -24,7 +24,9 @@
     "docker:open:mac": "echo Trying to launch on MacOS && sleep 2 && URL=http://localhost:$npm_package_config_imagePort && open $URL",
     "docker:debugmessage": "echo Docker Debug Completed Successfully! Hit Ctrl+C to terminate log tailing.",
     "predocker:debug": "run-s docker:build docker:run",
-    "docker:debug": "run-s -cs docker:open:win docker:open:mac docker:debugmessage docker:taillogs"
+    "docker:debug": "run-s -cs docker:open:win docker:open:mac docker:debugmessage docker:taillogs",
+    "seed": "node seed.enroll.controller.js --pretty",
+    "seed-local-dev": "node seed.enroll.controller.js -u mongodb://mongodb:27017/zac -f ./fixtures/ --pretty"
   },
   "config": {
     "imageRepo": "netfoundry/ziti-console",
@@ -32,12 +34,30 @@
     "imagePort": "1480"
   },
   "keywords": [
-    "ziti"
+    "ziti",
+    "nodejs"
   ],
-  "author": "Jeremy Tellier",
-  "license": "ISC",
+  "author": {
+    "name": "NetFoundry",
+    "url": "http://netfoundry.io"
+  },
+  "license": "Apache-2.0",
+  "licenses": [
+    {
+      "type": "Apache-2.0",
+      "url": "http://www.apache.org/licenses/LICENSE-2.0"
+    }
+  ],
+  "private": true,
+  "workspaces": [
+    "modules/*"
+  ],
   "dependencies": {
+    "@netfoundry/zt-logger": "0.0.1",
+    "argparse": "^1.0.10",
     "aws-sdk": "^2.504.0",
+    "bunyan-prettystream": "^0.1.3",
+    "config.json": "0.0.4",
     "cors": "^2.8.5",
     "cross-conf-env": "^1.1.2",
     "express": "^4.16.4",
@@ -55,6 +75,7 @@
     "nodemailer": "^6.1.1",
     "psl": "^1.3.0",
     "request": "^2.88.0",
-    "session-file-store": "^1.2.0"
+    "session-file-store": "^1.2.0",
+    "yargs": "^15.3.1"
   }
 }

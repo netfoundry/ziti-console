@@ -1,0 +1,78 @@
+		<script language="javascript" type="text/javascript">
+			page = {
+				isSetup: false,
+				init: function() {
+					this.events();
+					settings.init();
+					$("main").addClass("login");
+				}, 
+				events: function() {
+					$("#VerifyEmailButton").click(page.verifyEmail);
+					$("#CreateButton").click(page.create);
+					$("#EdgeControllerList").change(page.edgeChanged);
+					context.addListener(user.name,page.loggedIn);
+					context.addListener(settings.name, page.settingsReturned);
+				},
+				verifyEmail: function() {
+					context.set("serviceUrl", $("#EdgeControllerList").val());
+					var path = window.location.pathname;
+					var secret = path.split("/")[2];
+					emailVerification.verify(
+						secret,
+						$("#Email").val(),
+						$("#EnrollmentHost").val()
+					);
+				},
+				loggedIn: function() {
+					
+				},
+				validate: function() {
+					$(".errors").removeClass("errors");
+					if ($("#EdgeName").val().trim().length==0) $("#EdgeName").addClass("errors");
+					if ($("#EdgeUrl").val().trim().length==0) $("#EdgeUrl").addClass("errors");
+					return $(".errors").length==0;
+				},
+				edgeChanged: function(e) {
+					var val = $("#EdgeControllerList").val();
+					if (val.length==0) {
+						$("#EdgeName").val("");
+						$("#EdgeUrl").val("");
+						$(".edgecreate").addClass("open");
+						$(".userlogin").removeClass("open");
+					} else {
+						$(".edgecreate").removeClass("open");
+						$(".userlogin").addClass("open");
+					}
+				},
+				settingsReturned: function(e) {
+					$(".open").removeClass("open");
+					$("#EdgeControllerList").html("");
+					if (settings.data.edgeControllers.length>0) {
+						$(".userlogin").addClass("open");
+						for (var i=0; i<settings.data.edgeControllers.length; i++) {
+							page.isSetup = true;
+							$("#EdgeControllerList").append('<option value="'+settings.data.edgeControllers[i].url+'">'+settings.data.edgeControllers[i].name+' ('+settings.data.edgeControllers[i].url+')</option>');
+						}
+					} else {
+						$(".edgecreate").addClass("open");
+					}
+					$("#EdgeControllerList").append('<option value="">Connect to a new Edge Controller</option>');
+					var lastUrl = context.get("serviceUrl");
+					if (lastUrl&&lastUrl.trim().length>0) $("#EdgeControllerList").val(lastUrl);
+				}
+			}
+		</script>
+		<style>
+			.edgecreate, .userlogin {
+				display: none;
+			}
+			.edgecreate.open, .userlogin.open {
+				display: inline-block;
+			}
+		</style>
+		<div id="EmailVerificationForm" class="form mini">
+			<div class="title">Email Verification Successful</div>
+			<br/>
+			<div class="subtitle">Your automagic Ziti enrollment is proceeding, and should complete in a moment.<br/><br/>You may now close this browser tab, and return to MattermoZt.</div>
+
+		</div>

@@ -1,0 +1,32 @@
+{
+  "$id": "http://ziti-edge.netfoundry.io/schemas/crypto.json",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "key",
+    "iv"
+  ],
+  "properties": {
+    "_id": {
+      "type": "object"
+    },
+    "id": {
+      "$ref": "definitions.json#/definitions/id"
+    },
+    "key": {
+      "type": "string"
+    },
+    "iv": {
+      "type": "string"
+    },
+    "tags": {
+      "$ref": "definitions.json#/definitions/tags"
+    },
+    "createdAt": {
+      "jsType": "date"
+    },
+    "updatedAt": {
+      "jsType": "date"
+    }
+  }
+}

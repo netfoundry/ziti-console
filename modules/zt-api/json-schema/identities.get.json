@@ -1,0 +1,77 @@
+{
+  "$id": "http://ziti-edge.netfoundry.io/schemas/identities.get.json",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "name",
+    "type",
+    "tags",
+    "permissions",
+    "isAdmin",
+    "authenticators"
+  ],
+  "properties": {
+    "name": {
+      "$ref": "definitions.all.json#/definitions/name"
+    },
+    "type": {
+      "type": "string",
+      "enum": [
+        "User",
+        "Device",
+        "ServiceAccount"
+      ]
+    },
+    "isDefaultAdmin":{
+      "type": "boolean"
+    },
+    "isAdmin": {
+      "type": "boolean",
+      "default": false
+    },
+    "permissions": {
+      "type": "array",
+      "items": {
+        "$ref": "definitions.all.json#/definitions/name"
+      },
+      "default": []
+    },
+    "authenticators": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "updb": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "username": {
+              "$ref": "definitions.all.json#/definitions/name"
+            }
+          }
+        },
+        "cert": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "fingerprint": {
+              "type": "string"
+            }
+          }
+        }
+      }
+    },
+    "id": {
+      "type": "string"
+    },
+    "createdAt": {
+      "type": "string"
+    },
+    "updatedAt": {
+      "type": "string"
+    },
+    "tags": {
+      "$ref": "definitions.all.json#/definitions/tags"
+    }
+  }
+}
+

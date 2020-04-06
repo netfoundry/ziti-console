@@ -1,0 +1,20 @@
+{
+  "name": "@netfoundry/zt-store",
+  "version": "0.0.1",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": {
+    "name": "NetFoundry",
+    "url": "http://netfoundry.io"
+  },
+  "license": "Apache-2.0",
+  "dependencies": {
+    "deep-filter": "^1.0.2",
+    "mongodb": "^3.0.5",
+    "nedb": "^1.8.0",
+    "uuid": "^3.2.1"
+  }
+}

@@ -4,3 +4,8 @@ node-console.iml
 node-console.ipr
 node-console.iws
 
+.DS_Store
+.dockerignore
+.vscode/
+data/
+postman/

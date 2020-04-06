@@ -1,0 +1,14 @@
+{
+  "$id": "http://ziti-enrollment-facade.netfoundry.io/schemas/enrollments.post.json",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "email"
+  ],
+  "properties": {
+    "email": {
+      "type": "string"
+    }
+  }
+}
+

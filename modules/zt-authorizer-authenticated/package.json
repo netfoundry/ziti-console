@@ -1,0 +1,17 @@
+{
+  "name": "@netfoundry/zt-authorizer-authenticated",
+  "version": "0.0.1",
+  "description": "Ensure an edge node request has an authenticated session",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": {
+    "name": "NetFoundry",
+    "url": "http://netfoundry.io"
+  },
+  "license": "Apache-2.0",
+  "dependencies": {
+    "@netfoundry/zt-api-response": "0.0.1"
+  }
+}

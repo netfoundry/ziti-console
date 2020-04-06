@@ -15,8 +15,5 @@ env | sort
 echo "===> User"
 id
 
-echo "===> Building ..."
-yarn build
-
 echo "===> Running ... "
-exec node index.js
+exec yarn start

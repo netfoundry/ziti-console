@@ -1,0 +1,20 @@
+{
+  "name": "@netfoundry/zt-api-app",
+  "version": "0.0.1",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": {
+    "name": "NetFoundry",
+    "url": "http://netfoundry.io"
+  },
+  "license": "Apache-2.0",
+  "dependencies": {
+    "@netfoundry/zt-api-response": "0.0.1",
+    "@netfoundry/zt-logger": "0.0.1",
+    "cookie-parser": "^1.4.3",
+    "express": "^4.16.2"
+  }
+}

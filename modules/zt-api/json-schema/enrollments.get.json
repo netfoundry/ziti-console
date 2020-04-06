@@ -1,0 +1,37 @@
+{
+  "$id": "http://ziti-edge.netfoundry.io/schemas/enrollments.get.json",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "email",
+    "tags",
+    "isVerified",
+    "jwt"
+  ],
+  "properties": {
+    "email": {
+      "type": "string"
+    },
+    "jwt": {
+      "type": "string"
+    },
+    "isEmailVerified":{
+      "type": "boolean"
+    },
+    "isIdentityCreated":{
+      "type": "boolean"
+    },
+    "id": {
+      "type": "string"
+    },
+    "createdAt": {
+      "type": "string"
+    },
+    "updatedAt": {
+      "type": "string"
+    },
+    "tags": {
+      "$ref": "definitions.all.json#/definitions/tags"
+    }
+  }
+}

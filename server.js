@@ -26,17 +26,100 @@ var headerFile = __dirname+"/assets/templates/header.htm";
 var footerFile = __dirname+"/assets/templates/footer.htm";
 var header = fs.readFileSync(headerFile, 'utf8');
 var footer = fs.readFileSync(footerFile, 'utf8');
-var isDebugging = true;
 
+var emailVerificationHeaderFile = __dirname+"/assets/templates/email-verification-header.htm";
+var emailVerificationHeader = fs.readFileSync(emailVerificationHeaderFile, 'utf8');
+
+const version = require('./package.json').version;
+
+let ArgumentParser = require('argparse').ArgumentParser;
+
+let parser = new ArgumentParser({
+	version: version,
+	addHelp: true,
+	description: 'An example controller node using a default implementation.'
+  });
+  
+  parser.addArgument(['-c', '--config'], {
+	required: true,
+	help: 'The configuration file to load',
+	dest: 'config'
+  });
+  
+  parser.addArgument(['--verbose'], {
+	action: 'append',
+	nargs: 0,
+	required: false,
+	help: 'Default log output shows fatal/error/warn/info. Specifying this switch once adds debug and twice adds trace.',
+	dest: 'verbosity'
+  });
+  
+  parser.addArgument(['-p', '--pretty'], {
+	nargs: 0,
+	required: false,
+	help: 'Changes console output to be a human readable stream',
+	dest: 'pretty'
+  });
+  
+  parser.addArgument(['-s', '--source'], {
+	nargs: 0,
+	required: false,
+	help: 'Adds source file and line number to log output',
+	dest: 'source'
+  });
+  
+  
+  let args = parser.parseArgs();
+  if(!fs.existsSync(args.config)) {
+	logger.error('\nInvalid configuration file supplied\n');
+	process.exit(1);
+  }
+  
+  let loggerConfig = {
+	level: 'info',
+	streams: [],
+	src: false,
+  };
+  
+  if(args.verbosity) {
+	if(args.verbosity.length === 1) {
+	  loggerConfig.level = 'debug';
+	} else {
+	  loggerConfig.level = 'trace';
+	}
+  }
+  
+  if(args.pretty) {
+	let PrettyStream = require('bunyan-prettystream');
+	let prettyStdOut = new PrettyStream();
+	prettyStdOut.pipe(process.stdout);
+	loggerConfig.streams.push({
+	  level: loggerConfig.level,
+	  type: 'raw',
+	  stream: prettyStdOut
+	});
+  } else {
+	loggerConfig.streams.push({
+	  level: loggerConfig.level,
+	  stream: process.stdout
+	});
+  }
+  
+  loggerConfig.src = !!args.source;
+  
+  const logger = require('@netfoundry/zt-logger')(loggerConfig);
+  
+  logger.info(`Starting with config file: ${args.config}`);
+  
 /**
  * Watch for header and footer file changes and load them
  */
 fs.watchFile(headerFile, (curr, prev) => {
-	log(headerFile+" file Changed");
+	logger.info(headerFile+" file Changed");
 	header = fs.readFileSync(headerFile, 'utf8');
 });
 fs.watchFile(footerFile, (curr, prev) => {
-	log(footerFile+" file Changed");
+	logger.info(footerFile+" file Changed");
 	footer = fs.readFileSync(footerFile, 'utf8');
 });
 
@@ -155,11 +238,11 @@ app.post("/api/login", function(request, response) {
 			username: request.body.username,
 			password: request.body.password
 		}
-		log("Connecting to: "+serviceUrl+"/authenticate?method=password");
-		log("Posting: "+JSON.stringify(params));
+		logger.info("Connecting to: "+serviceUrl+"/authenticate?method=password");
+		logger.info("Posting: "+JSON.stringify(params));
 		external.post(serviceUrl+"/authenticate?method=password", {json: params, rejectUnauthorized: false }, function(err, res, body) {
 			if (err) {
-				log(err);
+				logger.error(err);
 				var error = "Server Not Accessible";
 				if (err.code!="ECONNREFUSED") response.json( {error: err.code} );
 				response.json( {error: error} );
@@ -168,7 +251,7 @@ app.post("/api/login", function(request, response) {
 				else {
 					if (body.data&&body.data.token) {
 						request.session.user = body.data.token;
-						log("Session: "+request.session.user);
+						logger.info("Session: "+request.session.user);
 						request.session.authorization = 100;
 						response.json( {success: "Logged In"} );
 					} else response.json( {error: "Invalid Account"} );
@@ -184,7 +267,7 @@ app.post("/api/login", function(request, response) {
 app.post('/api/version', function(request, response) {
 	if (serviceUrl) {
 		external.get(serviceUrl+"/version", {rejectUnauthorized: false}, function(err, res, body) {
-			if (err) log(err);
+			if (err) logger.error(err);
 			else {
 				 var data = JSON.parse(body);
 				 if (data&&data.data) response.json( {data: data.data} );
@@ -206,17 +289,17 @@ app.post("/api/reset", function(request, response) {
 				current: request.body.password,
 				new: request.body.newpassword
 			}
-			log("Connecting to: "+serviceUrl+"/current-identity/updb/password");
-			log("Posting: "+JSON.stringify(params));
+			logger.info("Connecting to: "+serviceUrl+"/current-identity/updb/password");
+			logger.info("Posting: "+JSON.stringify(params));
 			external.put(serviceUrl+"/current-identity/updb/password", {json: params, rejectUnauthorized: false, headers: { "zt-session": request.session.user }}, function(err, res, body) {
 				if (err) {
-					log(err);
+					logger.error(err);
 					var error = "Server Not Accessible";
 					if (err.code!="ECONNREFUSED") response.json( {error: err.code} );
 					response.json( {error: error} );
 				} else {
 					if (body.error) {
-						log(JSON.stringify(body.error));
+						logger.info(JSON.stringify(body.error));
 						response.json( {error: body.error.message} );
 					} else response.json( {success: "Password Updated"} );
 				}
@@ -338,15 +421,15 @@ app.delete("/api/server", function(request, response) {
 		var url = request.body.url;
 		var edges = [];
 		var fabrics = [];
-		log(url);
+		logger.info(url);
 		for (var i=0; i<settings.edgeControllers.length; i++) {
-			log(settings.edgeControllers[i].url);
+			logger.info(settings.edgeControllers[i].url);
 			if (settings.edgeControllers[i].url!=url) {
 				edges[edges.length] = settings.edgeControllers[i];
 			}
 		}
 		for (var i=0; i<settings.fabricControllers.length; i++) {
-			log(settings.fabricControllers[i].url);
+			logger.info(settings.fabricControllers[i].url);
 			if (settings.fabricControllers[i].url!=url) {
 				fabrics[fabrics.length] = settings.fabricControllers[i];
 			}
@@ -407,16 +490,16 @@ function GetItems(type, paging, request, response) {
 	}
 	if (serviceUrl==null||serviceUrl.trim().length==0) response.json({error:"loggedout"});
 	else {
-		log("Calling: "+serviceUrl+"/"+type+urlFilter);
+		logger.info("Calling: "+serviceUrl+"/"+type+urlFilter);
 		external.get(serviceUrl+"/"+type+urlFilter, {json: {}, rejectUnauthorized: false, headers: { "zt-session": request.session.user } }, function(err, res, body) {
 			if (err) {
-				log("Error: "+JSON.stringify(err));
+				logger.error("Error: "+JSON.stringify(err));
 				response.json({ error: err });
 			} else {
 				if (body.error) response.json( {error: body.error.message} );
 				else if (body.data) {
-					log("Items: "+body.data.length);
-					log("Results: "+JSON.stringify(body.data));
+					logger.info("Items: "+body.data.length);
+					logger.info("Results: "+JSON.stringify(body.data));
 					response.json( body );
 				} else {
 					body.data = [];
@@ -435,7 +518,7 @@ app.post("/api/dataSubs", function(request, response) {
 	var type = request.body.type;
 	if (request.body.url) {
 		var url = request.body.url.href.split("./").join("");
-		log("Calling: "+serviceUrl+"/"+url);
+		logger.info("Calling: "+serviceUrl+"/"+url);
 		external.get(serviceUrl+"/"+url+"?limit=99999999&offset=0&sort=name ASC", {json: {}, rejectUnauthorized: false, headers: { "zt-session": request.session.user } }, function(err, res, body) {
 			if (err) response.json({ error: err });
 			else {
@@ -443,14 +526,14 @@ app.post("/api/dataSubs", function(request, response) {
 					if (body.error.cause&&body.error.cause.message) response.json( {error: body.error.cause.message} );
 					else response.json( {error: body.error} );
 				} else if (body.data) {
-					log(body.data.length);
+					logger.info(body.data.length);
 					response.json({
 						id: id,
 						type: type,
 						data: body.data
 					});
 				} else {
-					console.log(JSON.stringify(body));
+					logger.info(JSON.stringify(body));
 					response.json( {error: "Unable to retrieve data"} );
 				}
 			}
@@ -504,7 +587,7 @@ function GetFabricItems(type, response) {
 		}
 	}
 	if (canCall) {
-		log("Calling Fabric: "+type+" "+fabricUrl+"/ctrl/"+type);
+		logger.info("Calling Fabric: "+type+" "+fabricUrl+"/ctrl/"+type);
 		external.get(fabricUrl+"/ctrl/"+type, { json: {}, rejectUnauthorized: false }, function(err, res, body) {
 			if (err) response.json({ error: "Unable to connect to fabric" });
 			else {
@@ -553,19 +636,19 @@ app.post("/api/dataSave", function(request, response) {
 						for (var i=0; i<objects.length; i++) {
 							var params = {};
 							params.ids = objects[i][1];
-							log("Delete:"+serviceUrl+"/"+type+"/"+id.trim()+"/"+objects[i][0]);
-							log(JSON.stringify(params));
+							logger.info("Delete:"+serviceUrl+"/"+type+"/"+id.trim()+"/"+objects[i][0]);
+							logger.info(JSON.stringify(params));
 							external.delete(serviceUrl+"/"+type+"/"+id.trim()+"/"+objects[i][0], {json: params, rejectUnauthorized: false, headers: { "zt-session": request.session.user } }, function(err, res, body) {});
 						}
 					}
 				}
 			}
-			log("Calling: "+url);
-			log("Saving As: "+method+" "+JSON.stringify(saveParams));
+			logger.info("Calling: "+url);
+			logger.info("Saving As: "+method+" "+JSON.stringify(saveParams));
 			external(url, {method: method, json: saveParams, rejectUnauthorized: false, headers: { "zt-session": request.session.user } }, function(err, res, body) {
 				if (err) response.json({ error: err });
 				else {
-					log(JSON.stringify(body));
+					logger.info(JSON.stringify(body));
 					if (body.error) {
 						if (body.error.cause&&body.error.cause.message) response.json( {error: body.error.cause.message} );
 						else response.json( {error: body.error} );
@@ -576,9 +659,9 @@ app.post("/api/dataSave", function(request, response) {
 							if (objects.length>0) {
 								if (method=="POST") id = body.data.id;
 								for (var i=0; i<objects.length; i++) {
-									log("Body: "+JSON.stringify(body.data));
-									log("Url: "+serviceUrl+"/"+type+"/"+id+"/"+objects[i][0]);
-									log("Objects: "+JSON.stringify({ ids: objects[i][1] }));
+									logger.info("Body: "+JSON.stringify(body.data));
+									logger.info("Url: "+serviceUrl+"/"+type+"/"+id+"/"+objects[i][0]);
+									logger.info("Objects: "+JSON.stringify({ ids: objects[i][1] }));
 									external.put(serviceUrl+"/"+type+"/"+id+"/"+objects[i][0], {json: { ids: objects[i][1] }, rejectUnauthorized: false, headers: { "zt-session": user } }, function(err, res, body) {
 										index++;
 										if (index==objects.length) GetItems(type, paging, request, response);
@@ -608,14 +691,14 @@ app.post("/api/subSave", function(request, response) {
 		var saveParams = request.body.save;
 		var user = request.session.user;
 		if (hasAccess(user)) {
-			log(url);
-			log("Saving As: "+doing+" "+JSON.stringify(saveParams));
+			logger.info(url);
+			logger.info("Saving As: "+doing+" "+JSON.stringify(saveParams));
 			external(url, {method: doing, json: saveParams, rejectUnauthorized: false, headers: { "zt-session": request.session.user } }, function(err, res, body) {
 				if (err) {
-					log(err);
+					logger.error(err);
 					response.json({ error: err });
 				} else {
-					log(JSON.stringify(body));
+					logger.info(JSON.stringify(body));
 					GetItems(fullType, null, request, response);
 				}
 			});
@@ -631,18 +714,18 @@ app.post("/api/verify", function(request, response) {
 		var url = serviceUrl+"/cas/"+id+"/verify";
 		var user = request.session.user;
 		if (hasAccess(user)) {
-			log(url);
-			log("Verifying As: "+url+" "+cert);
+			logger.info(url);
+			logger.info("Verifying As: "+url+" "+cert);
 			external(url, {method: "POST", body: cert, rejectUnauthorized: false, headers: { "zt-session": request.session.user } }, function(err, res, body) {
-				console.log("Body:"+body);
+				logger.info("Body:"+body);
 				var result = JSON.parse(body);
 				if (err) {
-					log(err);
+					logger.error(err);
 					response.json({ error: err });
 				} else {
 					if (result.error) response.json( {error: result.error.message} );
 					else {
-						log(JSON.stringify(body));
+						logger.info(JSON.stringify(body));
 						response.json({ success: "Certificate Verified"});
 					}
 				}
@@ -679,7 +762,7 @@ app.post("/api/delete", function(request, response) {
 	Promise.all(promises).then(function(e) {
 		GetItems(type, paging, request, response);
 	}).catch(error => { 
-		log("Catch: "+error.message);
+		logger.error("Catch: "+error.message);
 		response.json({error: error.causeMessage});
 	});
 });
@@ -693,13 +776,13 @@ app.post("/api/delete", function(request, response) {
  */
 function ProcessDelete(type, id, user) {
 	return new Promise(function(resolve, reject) {
-		log("Delete: "+serviceUrl+"/"+type+"/"+id)
+		logger.info("Delete: "+serviceUrl+"/"+type+"/"+id)
 		external.delete(serviceUrl+"/"+type+"/"+id, {json: {}, rejectUnauthorized: false, headers: { "zt-session": user } }, function(err, res, body) {
 			if (err) {
-				log("Err: "+err);
+				logger.error("Err: "+err);
 				reject(err);
 			} else {
-				log(JSON.stringify(body));
+				logger.info(JSON.stringify(body));
 				if (body.error) reject(body.error);
 				else resolve(body.data);
 			}
@@ -824,13 +907,13 @@ app.post("/api/average", function(request, response) {
 	});
 
 	var query = "select MEAN(mean) from \""+source+"\" WHERE source='"+id+"'";
-	log(query);
+	logger.info(query);
 	influx.query(query).then(result => {
 		var avg = 0;
 		if (result.length>0) avg = result[0].mean;
 		response.json({ id: id, source: source+".average", data: avg });
 	}).catch(error => {
-		log(error);
+		logger.error(error);
 		response.json({ error: error });
 	});
 });
@@ -860,14 +943,14 @@ app.post("/api/series", function(request, response) {
 	});
 
 	var query = "select MEAN(mean) from \""+source+"\" WHERE source='"+id+"' AND time > now() - 6d GROUP BY time(1d)";
-	log(query);
+	logger.info(query);
 	influx.query(query).then(result => {
 		for (var i=0; i<result.length; i++) {
-			log(moment(result[i].time).fromNow()+" "+result[i].mean);
+			logger.info(moment(result[i].time).fromNow()+" "+result[i].mean);
 		}
 		response.json({ source: source, data: result });
 	}).catch(error => {
-		log(error);
+		logger.error(error);
 		response.json({ error: error });
 	});
 });
@@ -902,15 +985,34 @@ app.post("/api/message", function(request, response) {
 	});
 });
 
+
+
+/**------------- Enrollment Email Verification Funcations -------------**/
+
+
+
 /**
- * If debugging is turned on show the log on the console.
- * @param {The text of the message} message 
+ * Get the specified resource and send it back to the client. Generally icons and custom images
  */
-function log(message) {
-	if (isDebugging) console.log(message);
-}
+app.get('/email-verification/:secret', function(request, response) {
+	let secret = request.params.secret;
+	let headerNow = emailVerificationHeader.split("{{title}}").join("Email Verification");
+	headerNow = headerNow.split("{{auth}}").join("");
+	const enrollControllerConfig = require('config.json')(args.config);
+	fs.readFile(__dirname+"/html/email-verification.htm", 'utf8', function(err, data) {
+		data = data.replace(/\$enrollmentHost/g, enrollControllerConfig.externalHost.enrollment.hostname);
+		response.send(headerNow+data);
+	});
+});
 
-
+app.get('/email-verification-complete', function(request, response) {
+	let headerNow = emailVerificationHeader.split("{{title}}").join("Email Verification");
+	headerNow = headerNow.split("{{auth}}").join("");
+	logger.info("enrollControllerConfig: %o", enrollControllerConfig.externalHost.enrollment);
+	fs.readFile(__dirname+"/html/email-verification-complete.htm", 'utf8', function(err, data) {
+		response.send(headerNow+data);
+	});
+});
 
 
 /**------------- Serve the Express Application -------------**/
@@ -921,23 +1023,31 @@ function log(message) {
  * Serve the current app on the defined port
  */
 app.listen(port, function() {
-	log("Ziti Server running on port "+port);
+	logger.info(`Ziti Admin Console running on port ${port}`);
 });
 
 /**
  * If certificates are defined, setup an https redirection service
  */
 if (fs.existsSync("./server.key")&&fs.existsSync("./server.chain.pem")) {
-    log("Initializing TLS");
+    logger.info("Initializing TLS");
 	try {
 		const options = {
 			key: fs.readFileSync("./server.key"),
 			cert: fs.readFileSync("./server.chain.pem")
 		};
-		log("TLS initialized on port: " + portTLS);
+		logger.info("TLS initialized on port: " + portTLS);
 		https.createServer(options, app).listen(portTLS);
 	} catch(err) {
-		log("ERROR: Could not initialize TLS!");
+		logger.error("ERROR: Could not initialize TLS!");
 		throw err;
 	}
 }
+
+const enrollControllerConfig = require('config.json')(args.config);
+require('@netfoundry/zt-enroll-controller')(enrollControllerConfig).then((enrollController)=>{
+	enrollController.listen();
+}).catch(err=>{
+  logger.fatal(err);
+  process.exit(1);
+});

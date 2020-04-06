@@ -1,0 +1,80 @@
+{
+  "$id": "http://ziti-edge.netfoundry.io/schemas/identities.json",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "name",
+    "type",
+    "authenticators",
+    "isDefaultAdmin",
+    "isAdmin",
+    "permissions",
+    "tags",
+    "id"
+  ],
+  "properties": {
+    "name": {
+      "$ref": "definitions.json#/definitions/name"
+    },
+    "type": {
+      "type": "string",
+      "enum": [
+        "User"
+      ]
+    },
+    "authenticators": {
+      "type": "object",
+      "additionalProperties": false,
+      "default": {},
+      "properties": {
+        "updb": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "password": {
+              "type": "string",
+              "minLength": 1
+            },
+            "username": {
+              "$ref": "definitions.json#/definitions/name"
+            }
+          },
+          "requried": [
+            "password",
+            "username"
+          ]
+        }
+      }
+    },
+    "isDefaultAdmin": {
+      "type": "boolean",
+      "default": false
+    },
+    "isAdmin": {
+      "type": "boolean",
+      "default": false
+    },
+    "permissions": {
+      "type": "array",
+      "items": {
+        "$ref": "definitions.json#/definitions/name"
+      },
+      "default": []
+    },
+    "id": {
+      "$ref": "definitions.json#/definitions/id"
+    },
+    "_id": {
+      "type": "object"
+    },
+    "tags": {
+      "$ref": "definitions.json#/definitions/tags"
+    },
+    "createdAt": {
+      "jsType": "date"
+    },
+    "updatedAt": {
+      "jsType": "date"
+    }
+  }
+}

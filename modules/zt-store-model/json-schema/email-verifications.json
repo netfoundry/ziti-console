@@ -1,0 +1,37 @@
+{
+  "$id": "http://ziti-edge.netfoundry.io/schemas/email-verifications.json",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "secret",
+    "id"
+  ],
+  "properties": {
+    "_id": {
+      "type": "object"
+    },
+    "id": {
+      "$ref": "definitions.json#/definitions/id"
+    },
+    "enrollmentId": {
+      "$ref": "definitions.json#/definitions/id"
+    },
+    "email": {
+      "nfEmail": "email",
+      "format": "email"
+    },
+    "secret": {
+      "type": "string",
+      "minLength": 0
+    },
+    "tags": {
+      "$ref": "definitions.json#/definitions/tags"
+    },
+    "createdAt": {
+      "jsType": "date"
+    },
+    "updatedAt": {
+      "jsType": "date"
+    }
+  }
+}

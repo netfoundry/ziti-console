@@ -1,0 +1,22 @@
+{
+  "$id": "http://ziti-edge.netfoundry.io/schemas/email-verifications.get.json",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "secret"
+  ],
+  "properties": {
+    "secret": {
+      "type": "string"
+    },
+    "id": {
+      "type": "string"
+    },
+    "createdAt": {
+      "type": "string"
+    },
+    "updatedAt": {
+      "type": "string"
+    }
+  }
+}

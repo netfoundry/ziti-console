@@ -1,0 +1,41 @@
+{
+  "$id": "http://ziti-edge.netfoundry.io/schemas/identities.post.json",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "name",
+    "type",
+    "tags",
+    "permissions",
+    "isAdmin"
+  ],
+  "properties": {
+    "name": {
+      "$ref": "definitions.all.json#/definitions/name"
+    },
+    "type": {
+      "type": "string",
+      "enum": [
+        "User",
+        "Device",
+        "ServiceAccount"
+      ]
+    },
+    "isAdmin": {
+      "type": "boolean",
+      "default": false
+    },
+    "permissions": {
+      "type": "array",
+      "items": {
+        "$ref": "definitions.all.json#/definitions/name"
+      },
+      "default": []
+    },
+    "tags": {
+      "default": {},
+      "$ref": "definitions.all.json#/definitions/tags"
+    }
+  }
+}
+

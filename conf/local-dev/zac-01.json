@@ -1,0 +1,22 @@
+{
+  "mongoDb": {
+    "url": "mongodb://mongodb:27017",
+    "dbName": "zac"
+  },
+  "externalHost":{
+    "zac": {
+      "hostname": "zac-enroll.ziti.netfoundry.io:3000"
+    },
+    "enrollment": {
+      "hostname": "zac-enroll.ziti.netfoundry.io:1080"
+    },
+    "zitiController": {
+      "hostname": "https://demo4.ziti.netfoundry.io"
+    }
+  },
+  "apiHttpListener": {
+    "endpoint": {
+      "port": 1080
+    }
+  }
+}

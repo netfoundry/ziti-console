@@ -21,11 +21,11 @@ var app = {
 		app.events();
 		app.setupLock();
 		app.binding();
+		if (growler) growler.init();
 		if (page) page.init();
 		if (header) header.init();
 		if (user) user.init();
 		if (modal) modal.init();
-		if (growler) growler.init();
 		if (dragging) dragging.init();
 		if (tags) tags.init();
 		if (settings) settings.init();
@@ -73,7 +73,7 @@ var app = {
 	},
 	versionReturned: function(e) {
 		if (settings.versionData&&settings.versionData.data&&settings.versionData.data.version) {
-			$("#Version").html("v"+settings.versionData.data.version);
+			$("#Version").html("v"+settings.versionData.data.version.replace(/v/g, ""));	// remove potential extra "v"
 		}
 	},
 	dots: function(e) {
