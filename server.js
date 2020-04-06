@@ -141,6 +141,7 @@ app.use(function(req, res, next) {
 app.use(bodyParser.json());
 app.use(fileUpload());
 app.use('/assets', express.static('assets'));
+app.use('/.well-known', express.static('assets/.well-known', {dotfiles: 'allow'}));
 app.use(session({store: new sessionStore, secret: 'NetFoundryZiti', retries: 10, resave: true, saveUninitialized:true, ttl: 60000 }));
 
 /**
