@@ -42,7 +42,7 @@
     "cors": "^2.8.5",
     "cross-conf-env": "^1.1.2",
     "express": "^4.16.4",
-    "express-fileupload": "^1.1.6",
+    "express-fileupload": "^1.1.9",
     "express-fileuploader-s3": "0.0.1",
     "express-session": "^1.15.6",
     "fse": "^4.0.1",
